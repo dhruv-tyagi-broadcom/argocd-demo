@@ -11,7 +11,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/dhruv-tyagi-broadcom/vks-gitops-demo.git
+    repoURL: https://github.com/dhruv-tyagi-broadcom/argocd-demo.git
     targetRevision: main
     path: infra
     directory:
