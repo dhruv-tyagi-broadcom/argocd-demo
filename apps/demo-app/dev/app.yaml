@@ -17,7 +17,7 @@ data:
     <body><div class="card">
       <h1>ENV: DEV</h1>
       <p>Deployed by Argo CD on VKS</p>
-      <p class="pod">Served by pod: <!--#echo var="hostname" --></p>
+      <p class="pod">Served by cluster: vks-dev</p>
     </div></body></html>
   default.conf: |
     server {

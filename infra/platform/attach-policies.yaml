@@ -3,7 +3,7 @@
 apiVersion: argocd-service.vsphere.vmware.com/v1alpha1
 kind: EntityManagementPolicy
 metadata:
-  name: attach-dev
+  name: auto-attach-dev-policy
   namespace: dev-r734w
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
@@ -25,7 +25,7 @@ spec:
 apiVersion: argocd-service.vsphere.vmware.com/v1alpha1
 kind: EntityManagementPolicy
 metadata:
-  name: attach-prod
+  name: auto-attach-prod-policy
   namespace: dev-r734w
   annotations:
     argocd.argoproj.io/sync-wave: "-1"

@@ -3,16 +3,16 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: web-prod-cloud-init
+  name: prod-vm-cloud-init
   namespace: dev-r734w
   annotations:
     argocd.argoproj.io/sync-wave: "-1"   # must exist before the VM boots
   labels:
-    vm-selector: web-prod
+    vm-selector: prod-vm
 stringData:
   user-data: |
     #cloud-config
-    hostname: web-prod
+    hostname: prod-vm
     write_files:
       - path: /srv/www/index.html
         content: |
@@ -20,7 +20,7 @@ stringData:
           <html><head><meta charset="utf-8"><title>VM APP - PROD</title>
           <style>
             body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
-                   font-family:Arial, sans-serif; color:#fff; background:#c0392b; }
+                   font-family:Arial, sans-serif; color:#fff; background:#1e8449; }
             .card { text-align:center; } h1 { font-size:4em; margin:0; } p { font-size:1.6em; }
           </style></head>
           <body><div class="card">
@@ -45,11 +45,11 @@ stringData:
 apiVersion: vmoperator.vmware.com/v1alpha5
 kind: VirtualMachine
 metadata:
-  name: web-prod
+  name: prod-vm
   namespace: dev-r734w
   labels:
     env: prod
-    vm-selector: web-prod
+    vm-selector: prod-vm
     topology.kubernetes.io/zone: z-wld-a
 spec:
   className: best-effort-medium
@@ -60,18 +60,18 @@ spec:
   bootstrap:
     cloudInit:
       rawCloudConfig:
-        name: web-prod-cloud-init
+        name: prod-vm-cloud-init
         key: user-data
 ---
 apiVersion: vmoperator.vmware.com/v1alpha3
 kind: VirtualMachineService
 metadata:
-  name: web-prod
+  name: prod-vm
   namespace: dev-r734w
 spec:
   type: LoadBalancer
   selector:
-    vm-selector: web-prod
+    vm-selector: prod-vm
   ports:
     - name: http
       protocol: TCP

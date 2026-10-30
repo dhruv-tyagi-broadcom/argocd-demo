@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: web-dev-cloud-init
+  name: dev-vm-cloud-init
   namespace: dev-r734w
   annotations:
     argocd.argoproj.io/sync-wave: "-1"   # must exist before the VM boots
   labels:
-    vm-selector: web-dev
+    vm-selector: dev-vm
 stringData:
   user-data: |
     #cloud-config
-    hostname: web-dev
+    hostname: dev-vm
     write_files:
       - path: /srv/www/index.html
         content: |
@@ -43,11 +43,11 @@ stringData:
 apiVersion: vmoperator.vmware.com/v1alpha5
 kind: VirtualMachine
 metadata:
-  name: web-dev
+  name: dev-vm
   namespace: dev-r734w
   labels:
     env: dev
-    vm-selector: web-dev
+    vm-selector: dev-vm
     topology.kubernetes.io/zone: z-wld-a
 spec:
   className: best-effort-medium
@@ -58,18 +58,18 @@ spec:
   bootstrap:
     cloudInit:
       rawCloudConfig:
-        name: web-dev-cloud-init
+        name: dev-vm-cloud-init
         key: user-data
 ---
 apiVersion: vmoperator.vmware.com/v1alpha3
 kind: VirtualMachineService
 metadata:
-  name: web-dev
+  name: dev-vm
   namespace: dev-r734w
 spec:
   type: LoadBalancer
   selector:
-    vm-selector: web-dev
+    vm-selector: dev-vm
   ports:
     - name: http
       protocol: TCP

@@ -10,14 +10,14 @@ data:
     <html><head><meta charset="utf-8"><title>VKS GitOps Demo - PROD</title>
     <style>
       body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
-             font-family:Arial, sans-serif; color:#fff; background:#c0392b; }
+             font-family:Arial, sans-serif; color:#fff; background:#1e8449; }
       .card { text-align:center; } h1 { font-size:4em; margin:0; } p { font-size:1.6em; margin:.4em 0; }
       .pod { font-family:monospace; opacity:.8; }
     </style></head>
     <body><div class="card">
       <h1>ENV: PROD</h1>
       <p>Deployed by Argo CD on VKS</p>
-      <p class="pod">Served by pod: <!--#echo var="hostname" --></p>
+      <p class="pod">Served by cluster: vks-prod</p>
     </div></body></html>
   default.conf: |
     server {
