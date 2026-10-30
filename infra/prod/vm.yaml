@@ -1,0 +1,79 @@
+# A "legacy" web server running on a VM, next to the VKS cluster.
+# cloud-init writes a page and serves it with python3 (no internet access needed).
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prod-vm-cloud-init
+  namespace: dev-r734w
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"   # must exist before the VM boots
+  labels:
+    vm-selector: prod-vm
+stringData:
+  user-data: |
+    #cloud-config
+    hostname: prod-vm
+    write_files:
+      - path: /srv/www/index.html
+        content: |
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>VM APP - PROD</title>
+          <style>
+            body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
+                   font-family:Arial, sans-serif; color:#fff; background:#1e8449; }
+            .card { text-align:center; } h1 { font-size:4em; margin:0; } p { font-size:1.6em; }
+          </style></head>
+          <body><div class="card">
+            <h1>ENV: PROD</h1>
+            <p>App running on a KubeVM Service VM</p>
+            <p>Deployed by Argo CD with KubeVM Service</p>
+          </div></body></html>
+      - path: /etc/systemd/system/web.service
+        content: |
+          [Unit]
+          Description=Legacy web page
+          After=network-online.target
+          [Service]
+          ExecStart=/usr/bin/python3 -m http.server 80 --directory /srv/www
+          Restart=always
+          [Install]
+          WantedBy=multi-user.target
+    runcmd:
+      - systemctl daemon-reload
+      - systemctl enable --now web.service
+---
+apiVersion: vmoperator.vmware.com/v1alpha5
+kind: VirtualMachine
+metadata:
+  name: prod-vm
+  namespace: dev-r734w
+  labels:
+    env: prod
+    vm-selector: prod-vm
+    topology.kubernetes.io/zone: z-wld-a
+spec:
+  className: best-effort-medium
+  # Friendly image name: Ubuntu 22.04 LTS Minimal - Jammy
+  imageName: vmi-b59a338f867943c6d
+  storageClass: vsan-default-storage-policy
+  powerState: PoweredOn
+  bootstrap:
+    cloudInit:
+      rawCloudConfig:
+        name: prod-vm-cloud-init
+        key: user-data
+---
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachineService
+metadata:
+  name: prod-vm
+  namespace: dev-r734w
+spec:
+  type: LoadBalancer
+  selector:
+    vm-selector: prod-vm
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
