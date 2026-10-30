@@ -1,0 +1,32 @@
+# Infrastructure: everything under infra/ is applied to the Supervisor namespace.
+#   infra/platform/  -> RBAC + auto-attach policies (applied first, wave -1)
+#   infra/<env>/     -> one folder per environment: a VKS cluster + a VM
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra
+  namespace: dev-r734w
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io   # deleting this app deletes the clusters and VMs
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dhruv-tyagi-broadcom/vks-gitops-demo.git
+    targetRevision: main
+    path: infra
+    directory:
+      recurse: true
+  destination:
+    name: dev-r734w
+    namespace: dev-r734w
+  ignoreDifferences:
+    - group: vmoperator.vmware.com
+      kind: VirtualMachine
+      jsonPointers:
+        - /spec/volumes
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true

@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: dev-r734w
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/dhruv-tyagi-broadcom/argocd-demo.git
+    targetRevision: main
+    path: argocd
+  destination:
+    name: dev-r734w
+    namespace: dev-r734w
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

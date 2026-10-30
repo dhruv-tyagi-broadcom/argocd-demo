@@ -1,0 +1,32 @@
+# Lets the Argo CD service account read VKS clusters and their kubeconfig
+# so the auto-attach policies can register them.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argocd-k8s-sa-vks
+  namespace: dev-r734w
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+rules:
+  - apiGroups: ["cluster.x-k8s.io"]
+    resources: ["clusters"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-k8s-sa-vks
+  namespace: dev-r734w
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: argocd-k8s-sa-vks
+subjects:
+  - kind: ServiceAccount
+    name: argocd-k8s-sa
+    namespace: dev-r734w

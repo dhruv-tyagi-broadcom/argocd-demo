@@ -1,0 +1,73 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: -web-dev-cloud-init
+  namespace: dev-r734w
+stringData:
+  user-data: |
+    #cloud-config
+    hostname: web-dev
+    write_files:
+      - path: /srv/www/index.html
+        content: |
+          <!doctype html>
+          <html><head><meta charset="utf-8"><title>VM APP - DEV</title>
+          <style>
+            body { margin:0; height:100vh; display:flex; align-items:center; justify-content:center;
+                   font-family:Arial, sans-serif; color:#fff; background:#1d6fa5; }
+            .card { text-align:center; } h1 { font-size:4em; margin:0; } p { font-size:1.6em; }
+          </style></head>
+          <body><div class="card">
+            <h1>ENV: DEV</h1>
+            <p>VM App running on a KubeVM Service</p>
+            <p>Deployed by Argo CD with KubeVM Service</p>
+          </div></body></html>
+      - path: /etc/systemd/system/web.service
+        content: |
+          [Unit]
+          Description=Legacy web page
+          After=network-online.target
+          [Service]
+          ExecStart=/usr/bin/python3 -m http.server 80 --directory /srv/www
+          Restart=always
+          [Install]
+          WantedBy=multi-user.target
+    runcmd:
+      - systemctl daemon-reload
+      - systemctl enable --now web.service
+---
+apiVersion: vmoperator.vmware.com/v1alpha5
+kind: VirtualMachine
+metadata:
+  name: web-dev
+  namespace: dev-r734w
+  labels:
+    env: dev
+    vm-service: web-dev
+    topology.kubernetes.io/zone: z-wld-a
+spec:
+  className: best-effort-medium
+  # Friendly image name: Ubuntu 22.04 LTS Minimal - Jammy
+  imageName: vmi-b59a338f867943c6d
+  storageClass: vsan-default-storage-policy
+  powerState: PoweredOn
+  bootstrap:
+    cloudInit:
+      rawCloudConfig:
+        name: web-dev-cloud-init
+        key: user-data
+---
+apiVersion: vmoperator.vmware.com/v1alpha3
+kind: VirtualMachineService
+metadata:
+  name: web-dev
+  namespace: dev-r734w
+spec:
+  type: LoadBalancer
+  selector:
+    vm-service: web-dev
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
