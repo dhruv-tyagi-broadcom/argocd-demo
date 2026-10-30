@@ -3,6 +3,8 @@ kind: Secret
 metadata:
   name: web-dev-cloud-init
   namespace: dev-r734w
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"   # must exist before the VM boots
   labels:
     vm-selector: web-dev
 stringData:
@@ -21,7 +23,7 @@ stringData:
           </style></head>
           <body><div class="card">
             <h1>ENV: DEV</h1>
-            <p>VM App running on a KubeVM Service</p>
+            <p>App running on a KubeVM Service VM</p>
             <p>Deployed by Argo CD with KubeVM Service</p>
           </div></body></html>
       - path: /etc/systemd/system/web.service
